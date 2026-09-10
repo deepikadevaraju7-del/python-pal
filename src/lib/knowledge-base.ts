@@ -249,6 +249,204 @@ export const knowledgeBase: KbEntry[] = [
       "Beyond the usual + - * /, Python has // for floor division, % for the remainder and ** for exponentiation. Comparison and logical operators (and, or, not) return booleans.",
     code: "7 / 2    # 3.5\n7 // 2   # 3\n7 % 2    # 1\n2 ** 10  # 1024",
   },
+  {
+    id: "why-python-beginners",
+    topic: "Choosing Python",
+    questions: [
+      "which is the best programming language for beginners",
+      "what language should i learn first",
+      "which coding language is easiest to start with",
+      "is python good for beginners",
+      "should i learn python or java first",
+      "what is a good first language for a student",
+      "recommend a language for someone new to coding",
+      "which programming language should i pick",
+    ],
+    answer:
+      "Python is the usual recommendation for beginners. Its syntax reads close to English, it needs no compiler setup or type declarations, errors are readable, and the same language carries you from first script into web, data and automation work.",
+    code: '# a complete, runnable Python program\nname = input("Your name? ")\nprint(f"Welcome, {name}!")',
+  },
+  {
+    id: "python-vs-others",
+    topic: "Python vs other languages",
+    questions: [
+      "python vs java",
+      "difference between python and c",
+      "is python faster than javascript",
+      "why is python slower than c",
+      "python or r for data science",
+      "should i use python or javascript for web",
+    ],
+    answer:
+      "Python trades raw speed for developer speed: it is interpreted and dynamically typed, so it runs slower than C or Java but takes far less code to write. For data work its library ecosystem (NumPy, pandas) beats R for general use; for the browser, JavaScript is required, while Python owns the server side.",
+  },
+  {
+    id: "install-run",
+    topic: "Installing and running Python",
+    questions: [
+      "how do i install python",
+      "how to run a python file",
+      "what is the python interpreter",
+      "how do i start writing python",
+      "which editor should i use for python",
+      "what is a virtual environment",
+    ],
+    answer:
+      "Install Python from python.org (or your package manager), save code in a .py file and run it with `python file.py`. VS Code or PyCharm are the common editors. Create a virtual environment per project so packages stay isolated.",
+    code: "python -m venv .venv\nsource .venv/bin/activate   # Windows: .venv\\Scripts\\activate\npip install requests\npython main.py",
+  },
+  {
+    id: "career",
+    topic: "Python careers and uses",
+    questions: [
+      "what jobs can i get with python",
+      "is python worth learning in 2026",
+      "can i get a job knowing only python",
+      "what can i build with python",
+      "is python used in ai and machine learning",
+      "how long does it take to learn python",
+    ],
+    answer:
+      "Python is used for backend web development, data analysis, machine learning, automation, testing and scripting. Basics take a few weeks; comfortable working ability usually takes a few months of regular practice plus small projects.",
+  },
+  {
+    id: "slicing",
+    topic: "Slicing and indexing",
+    questions: [
+      "how does slicing work in python",
+      "how do i get part of a list",
+      "what does list[::-1] do",
+      "how to reverse a string",
+      "negative index meaning",
+    ],
+    answer:
+      "Slicing takes sequence[start:stop:step]; stop is excluded, negative indexes count from the end and a step of -1 reverses. It works on lists, strings and tuples alike.",
+    code: 'items = [0, 1, 2, 3, 4]\nitems[1:3]     # [1, 2]\nitems[-2:]     # [3, 4]\n"hello"[::-1]  # \'olleh\'',
+  },
+  {
+    id: "input-output",
+    topic: "Input and output",
+    questions: [
+      "how do i take user input in python",
+      "what does print do",
+      "how to read a number from the user",
+      "how do i print multiple values",
+    ],
+    answer:
+      "input() always returns a string, so convert it with int() or float() when you need a number. print() accepts multiple values and supports sep and end to control formatting.",
+    code: 'age = int(input("Age: "))\nprint("Next year you are", age + 1, sep=" ", end="\\n")',
+  },
+  {
+    id: "libraries",
+    topic: "Popular libraries",
+    questions: [
+      "which libraries should i learn in python",
+      "what is numpy used for",
+      "what is pandas",
+      "best python framework for web",
+      "how do i make an api in python",
+      "what library is used for machine learning",
+    ],
+    answer:
+      "Common picks: requests for HTTP, pandas and NumPy for data, matplotlib for charts, Django or FastAPI for web APIs, pytest for tests, and scikit-learn or PyTorch for machine learning. Install any of them with pip.",
+    code: "pip install pandas requests fastapi\n\nimport pandas as pd\ndf = pd.read_csv('data.csv')\nprint(df.head())",
+  },
+  {
+    id: "recursion",
+    topic: "Recursion",
+    questions: [
+      "what is recursion",
+      "how do recursive functions work",
+      "recursion vs loop",
+      "what is a base case",
+      "why do i get recursionerror",
+    ],
+    answer:
+      "A recursive function calls itself on a smaller input and stops at a base case. Without a base case Python hits its recursion limit and raises RecursionError; loops are usually faster for simple repetition.",
+    code: "def factorial(n):\n    if n <= 1:      # base case\n        return 1\n    return n * factorial(n - 1)",
+  },
+  {
+    id: "lambda-functional",
+    topic: "Lambda and functional tools",
+    questions: [
+      "what is a lambda function",
+      "how do map and filter work",
+      "what does sorted key do",
+      "anonymous function in python",
+      "what is reduce",
+    ],
+    answer:
+      "A lambda is a one-expression anonymous function, handy as a key or callback. map() applies a function to every item, filter() keeps items where it returns True, and sorted(key=...) sorts by a computed value.",
+    code: 'words = ["pear", "fig", "apple"]\nsorted(words, key=lambda w: len(w))   # [\'fig\', \'pear\', \'apple\']\nlist(map(str.upper, words))\nlist(filter(lambda w: "p" in w, words))',
+  },
+  {
+    id: "mutability-copying",
+    topic: "Mutability and copying",
+    questions: [
+      "why did my list change unexpectedly",
+      "difference between copy and deepcopy",
+      "what is a mutable default argument",
+      "are strings mutable in python",
+      "how do i copy a list properly",
+    ],
+    answer:
+      "Assigning a list gives another name for the same object, so edits show through both names. Use list(x) or copy.deepcopy for nested data, and never use a mutable default like def f(items=[]) — it is shared across calls.",
+    code: "a = [1, 2]\nb = a          # same object\nc = a.copy()   # independent\n\ndef f(items=None):\n    items = items or []",
+  },
+  {
+    id: "scope",
+    topic: "Scope and namespaces",
+    questions: [
+      "what is variable scope in python",
+      "what does global mean",
+      "why is my variable not defined inside a function",
+      "local vs global variable",
+    ],
+    answer:
+      "Names assigned inside a function are local to it. Reading an outer name works, but rebinding one needs global (module level) or nonlocal (enclosing function).",
+    code: "count = 0\n\ndef bump():\n    global count\n    count += 1",
+  },
+  {
+    id: "iterators-generators",
+    topic: "Iterators and generators",
+    questions: [
+      "what is a generator in python",
+      "what does yield do",
+      "difference between iterator and iterable",
+      "how do i save memory when looping",
+    ],
+    answer:
+      "A generator function uses yield to produce values one at a time instead of building a whole list, which keeps memory flat over large data. Any object with __iter__ is iterable; the iterator is what next() advances.",
+    code: "def squares(n):\n    for i in range(n):\n        yield i * i\n\nfor value in squares(1_000_000):\n    ...",
+  },
+  {
+    id: "datetime-random-math",
+    topic: "Useful standard modules",
+    questions: [
+      "how do i get the current date in python",
+      "how to generate a random number",
+      "how do i work with json in python",
+      "how to pause a program in python",
+    ],
+    answer:
+      "The standard library covers most of this: datetime for dates, random for random values, json for parsing and dumping JSON, time.sleep to pause, and os/pathlib for files and paths.",
+    code: 'from datetime import datetime\nimport random, json, time\n\nprint(datetime.now())\nprint(random.randint(1, 6))\nprint(json.loads(\'{"a": 1}\'))\ntime.sleep(1)',
+  },
+  {
+    id: "debugging-best-practices",
+    topic: "Debugging and best practices",
+    questions: [
+      "how do i debug python code",
+      "what is pep8",
+      "how should i structure a python project",
+      "how do i write tests in python",
+      "how to make my python code faster",
+    ],
+    answer:
+      "Print or use breakpoint() to inspect state, read the last line of the traceback first, follow PEP 8 style, keep functions small, and write tests with pytest. For speed, favour built-ins and comprehensions before reaching for optimisation.",
+    code: "def add(a, b):\n    return a + b\n\ndef test_add():\n    assert add(2, 3) == 5   # run with: pytest",
+  },
 ];
 
 export const kbTopics = Array.from(new Set(knowledgeBase.map((e) => e.topic)));
+
