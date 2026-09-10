@@ -172,17 +172,25 @@ const CONFIDENCE_THRESHOLD = 0.34;
 export function findAnswer(question: string): MatchResult {
   const query = question.trim();
   const queryTerms = terms(query);
+  const effective = queryTerms.length ? queryTerms : terms(query, true);
 
   let best: { entry: KbEntry; score: number } | null = null;
 
   for (const doc of documents) {
-    const cosine = similarity(queryTerms.length ? queryTerms : terms(query, true), doc.terms);
-    const fuzzy = bigramOverlap(query, doc.terms.join(" "));
+    const cosine = similarity(effective, doc.terms);
+    const fuzzy = bigramOverlap(query, doc.text);
     const score = cosine * 0.8 + fuzzy * 0.2;
     if (!best || score > best.score) best = { entry: doc.entry, score };
   }
 
+  // Broader pass over each entry's full text — rescues indirect phrasings.
+  for (const doc of entryDocuments) {
+    const score = similarity(effective, doc.terms) * 0.85;
+    if (!best || score > best.score) best = { entry: doc.entry, score };
+  }
+
   const confidence = best ? Math.min(0.99, Math.round(best.score * 100) / 100) : 0;
+
 
   if (!best || confidence < CONFIDENCE_THRESHOLD) {
     return {
