@@ -23,19 +23,94 @@ function stem(word: string): string {
   return word;
 }
 
+/** Normalises everyday phrasing so indirect questions land on the same terms. */
+const SYNONYMS: Record<string, string> = {
+  coding: "programming",
+  code: "programming",
+  coder: "programming",
+  developer: "programming",
+  language: "language",
+  lang: "language",
+  newbie: "beginner",
+  starter: "beginner",
+  novice: "beginner",
+  new: "beginner",
+  start: "beginner",
+  first: "beginner",
+  learn: "beginner",
+  learner: "beginner",
+  student: "beginner",
+  easiest: "best",
+  easy: "best",
+  simplest: "best",
+  recommend: "best",
+  suggest: "best",
+  good: "best",
+  top: "best",
+  prefer: "best",
+  dict: "dictionary",
+  arr: "list",
+  array: "list",
+  array_: "list",
+  func: "function",
+  method: "function",
+  def: "function",
+  error: "exception",
+  errors: "exception",
+  bug: "exception",
+  crash: "exception",
+  exception: "exception",
+  class: "class",
+  oop: "class",
+  object: "class",
+  str: "string",
+  text: "string",
+  int: "number",
+  integer: "number",
+  float: "number",
+  num: "number",
+  iterate: "loop",
+  iteration: "loop",
+  repeat: "loop",
+  job: "career",
+  career: "career",
+  salary: "career",
+  worth: "career",
+  install: "install",
+  setup: "install",
+  run: "install",
+  library: "library",
+  package: "library",
+  framework: "library",
+  module: "module",
+};
+
+function normalize(word: string): string {
+  return SYNONYMS[word] ?? word;
+}
+
 function terms(text: string, keepStopWords = false): string[] {
   return tokenize(text)
     .filter((w) => keepStopWords || !STOP_WORDS.has(w))
-    .map(stem);
+    .map((w) => normalize(stem(normalize(w))));
 }
 
 /** Inverse document frequency over every stored question variant. */
-const documents: { entry: KbEntry; terms: string[] }[] = knowledgeBase.flatMap((entry) =>
-  entry.questions.map((q) => ({
-    entry,
-    terms: terms(`${q} ${entry.topic}`),
-  })),
+const documents: { entry: KbEntry; terms: string[]; text: string }[] = knowledgeBase.flatMap(
+  (entry) =>
+    entry.questions.map((q) => ({
+      entry,
+      terms: terms(`${q} ${entry.topic}`),
+      text: `${q} ${entry.topic}`,
+    })),
 );
+
+/** Broader per-entry documents (topic + answer) so off-script wording still lands. */
+const entryDocuments: { entry: KbEntry; terms: string[] }[] = knowledgeBase.map((entry) => ({
+  entry,
+  terms: terms(`${entry.topic} ${entry.questions.join(" ")} ${entry.answer}`),
+}));
+
 
 const idf = new Map<string, number>();
 {
