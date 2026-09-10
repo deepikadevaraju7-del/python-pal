@@ -85,11 +85,11 @@ function bigramOverlap(a: string, b: string): number {
 
 export type MatchResult = {
   matched: boolean;
-  topic?: string;
+  topic?: string | undefined;
   answer: string;
-  code?: string;
+  code?: string | undefined;
   confidence: number;
-  suggestions?: string[];
+  suggestions?: string[] | undefined;
 };
 
 const CONFIDENCE_THRESHOLD = 0.34;
