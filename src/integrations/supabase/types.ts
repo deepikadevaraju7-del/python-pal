@@ -14,7 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      python_knowledge_base: {
+        Row: {
+          answer: string
+          code: string | null
+          created_at: string
+          id: string
+          questions: Json
+          sort_order: number
+          topic: string
+          updated_at: string
+        }
+        Insert: {
+          answer: string
+          code?: string | null
+          created_at?: string
+          id: string
+          questions?: Json
+          sort_order?: number
+          topic: string
+          updated_at?: string
+        }
+        Update: {
+          answer?: string
+          code?: string | null
+          created_at?: string
+          id?: string
+          questions?: Json
+          sort_order?: number
+          topic?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
