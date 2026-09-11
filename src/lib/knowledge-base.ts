@@ -633,6 +633,10 @@ export const knowledgeBase: KbEntry[] = [
     topic: "Async and concurrency",
     questions: [
       "what is async await in python",
+      "how do i speed up many network calls",
+      "how to make many requests at the same time",
+      "how do i use multithreading",
+      "how to make python code run concurrently",
       "how do i run things in parallel in python",
       "what is the gil",
       "threads or processes in python",
