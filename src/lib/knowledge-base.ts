@@ -446,6 +446,219 @@ export const knowledgeBase: KbEntry[] = [
       "Print or use breakpoint() to inspect state, read the last line of the traceback first, follow PEP 8 style, keep functions small, and write tests with pytest. For speed, favour built-ins and comprehensions before reaching for optimisation.",
     code: "def add(a, b):\n    return a + b\n\ndef test_add():\n    assert add(2, 3) == 5   # run with: pytest",
   },
+  {
+    id: "virtual-envs",
+    topic: "Virtual environments and pip",
+    questions: [
+      "how do i install a package in python",
+      "what is pip",
+      "what is a virtual environment",
+      "how do i keep project dependencies separate",
+      "what is requirements txt",
+      "how to use venv",
+    ],
+    answer:
+      "pip installs packages from PyPI, and a virtual environment keeps each project's packages separate from the system Python. Create one with python -m venv, activate it, install what you need, then freeze the list into requirements.txt.",
+    code: "python -m venv .venv\nsource .venv/bin/activate   # Windows: .venv\\Scripts\\activate\npip install requests\npip freeze > requirements.txt",
+  },
+  {
+    id: "dates-time",
+    topic: "Dates and times",
+    questions: [
+      "how do i format a date in python",
+      "how to get todays date",
+      "how do i measure how long code takes",
+      "how to convert a string to a date",
+    ],
+    answer:
+      "Use datetime for calendar work: datetime.now() for the current moment, strftime to format, strptime to parse, and timedelta for arithmetic. For timing code, use time.perf_counter().",
+    code: 'from datetime import datetime, timedelta\n\nnow = datetime.now()\nprint(now.strftime("%Y-%m-%d %H:%M"))\nprint(datetime.strptime("2026-01-31", "%Y-%m-%d"))\nprint(now + timedelta(days=7))',
+  },
+  {
+    id: "sorting-searching",
+    topic: "Sorting and searching",
+    questions: [
+      "how do i sort a list in python",
+      "how to sort a dictionary by value",
+      "how do i sort by a key",
+      "how do i find the largest item",
+      "how to reverse a list",
+    ],
+    answer:
+      "sorted() returns a new sorted list and list.sort() sorts in place; both take key= and reverse=. max/min accept the same key argument, and slicing with [::-1] reverses a sequence.",
+    code: 'people = [{"name": "Ada", "age": 36}, {"name": "Bo", "age": 24}]\nprint(sorted(people, key=lambda p: p["age"]))\n\nscores = {"a": 3, "b": 9}\nprint(sorted(scores.items(), key=lambda kv: kv[1], reverse=True))',
+  },
+  {
+    id: "string-formatting",
+    topic: "String formatting",
+    questions: [
+      "how do i combine text and variables in python",
+      "what is an f string",
+      "how do i round a number in output",
+      "how to print with two decimal places",
+    ],
+    answer:
+      "f-strings are the modern way to build text: put an f before the quotes and drop expressions inside braces. Format specifiers after a colon control decimals, padding and thousands separators.",
+    code: 'name, total = "Ada", 1234.5678\nprint(f"{name} owes {total:,.2f}")\nprint(f"{42:>5}")  # right aligned in 5 columns',
+  },
+  {
+    id: "numbers-math",
+    topic: "Numbers and maths",
+    questions: [
+      "how do i round a number in python",
+      "what is integer division",
+      "how do i get a remainder",
+      "why is 0.1 + 0.2 not 0.3",
+      "how to do square root in python",
+    ],
+    answer:
+      "// is floor division, % is the remainder, ** is a power, and math.sqrt (or ** 0.5) gives square roots. Floats are binary approximations, so use round() for display and the decimal module when exact money maths matters.",
+    code: "import math\nprint(7 // 2, 7 % 2, 2 ** 10)\nprint(math.sqrt(16), round(3.14159, 2))\nprint(0.1 + 0.2)  # 0.30000000000000004",
+  },
+  {
+    id: "type-conversion",
+    topic: "Type conversion",
+    questions: [
+      "how do i convert a string to a number",
+      "how to turn a number into text",
+      "why does input give me a string",
+      "how do i cast types in python",
+    ],
+    answer:
+      "Convert explicitly with int(), float(), str(), list() and dict(). input() always returns a string, so wrap it in int() or float() before doing maths, and guard with try/except in case the text is not numeric.",
+    code: 'age = int(input("Age: "))\nprint(str(age) + " years")\nprint(float("3.5"), list("abc"))',
+  },
+  {
+    id: "web-scraping-requests",
+    topic: "Working with APIs and the web",
+    questions: [
+      "how do i call an api in python",
+      "how to make an http request",
+      "how do i scrape a website with python",
+      "how to download a file in python",
+    ],
+    answer:
+      "requests is the usual choice for HTTP: requests.get(url).json() fetches and parses an API response. For scraping HTML, pair it with BeautifulSoup, and always check the site's terms and rate limits.",
+    code: 'import requests\n\nres = requests.get("https://api.github.com/users/python")\nres.raise_for_status()\nprint(res.json()["public_repos"])',
+  },
+  {
+    id: "data-science",
+    topic: "Data analysis with Python",
+    questions: [
+      "how do i analyse data in python",
+      "what is pandas used for",
+      "how to read a csv file in python",
+      "how do i plot a graph in python",
+      "is python good for data science",
+    ],
+    answer:
+      "pandas is the workhorse for tabular data: read_csv loads a file into a DataFrame, and you filter, group and aggregate from there. numpy handles fast numeric arrays and matplotlib draws the charts.",
+    code: 'import pandas as pd\n\ndf = pd.read_csv("sales.csv")\nprint(df.head())\nprint(df.groupby("region")["amount"].sum())',
+  },
+  {
+    id: "web-frameworks",
+    topic: "Web development with Python",
+    questions: [
+      "can i build a website with python",
+      "what is django",
+      "flask or django which is better",
+      "how do i make an api with python",
+    ],
+    answer:
+      "Yes. Django is a batteries-included framework with an ORM and admin, ideal for full sites. Flask and FastAPI are lighter; FastAPI is a strong pick for JSON APIs thanks to type hints and automatic docs.",
+    code: 'from fastapi import FastAPI\n\napp = FastAPI()\n\n@app.get("/hello")\ndef hello():\n    return {"message": "hi"}',
+  },
+  {
+    id: "automation",
+    topic: "Automation and scripting",
+    questions: [
+      "what can i automate with python",
+      "how do i rename many files at once",
+      "can python send emails",
+      "how do i schedule a python script",
+    ],
+    answer:
+      "Python shines at glue work: pathlib and os for bulk file renaming and cleanup, openpyxl for spreadsheets, smtplib for email, and cron or Task Scheduler to run a script on a timetable.",
+    code: 'from pathlib import Path\n\nfor i, p in enumerate(Path("photos").glob("*.jpg"), 1):\n    p.rename(p.with_name(f"holiday_{i:03}.jpg"))',
+  },
+  {
+    id: "learning-path",
+    topic: "Learning Python",
+    questions: [
+      "how long does it take to learn python",
+      "how should i start learning python",
+      "what should i learn after the basics",
+      "do i need maths to learn python",
+      "what projects should a beginner build",
+    ],
+    answer:
+      "Most learners get comfortable with the basics in a few weeks of daily practice. Work through syntax, lists and dictionaries, functions, then files and errors, and build small projects — a calculator, a to-do list, a file organiser — before moving to a framework. Heavy maths is only needed for data science.",
+  },
+  {
+    id: "python2-vs-3",
+    topic: "Python versions",
+    questions: [
+      "python 2 or python 3",
+      "which version of python should i use",
+      "what is new in the latest python",
+      "how do i check my python version",
+    ],
+    answer:
+      "Always use Python 3 — Python 2 reached end of life in 2020. Install the latest stable 3.x release; check what you have with python --version.",
+    code: "python --version\nimport sys; print(sys.version_info)",
+  },
+  {
+    id: "type-hints",
+    topic: "Type hints",
+    questions: [
+      "what are type hints in python",
+      "how do i annotate function arguments",
+      "is python statically typed",
+      "what is mypy",
+    ],
+    answer:
+      "Type hints are optional annotations that document what a function expects and returns. Python does not enforce them at runtime, but tools like mypy or your editor use them to catch mistakes early.",
+    code: "def greet(name: str, times: int = 1) -> str:\n    return (f\"Hi {name}! \" * times).strip()",
+  },
+  {
+    id: "async",
+    topic: "Async and concurrency",
+    questions: [
+      "what is async await in python",
+      "how do i run things in parallel in python",
+      "what is the gil",
+      "threads or processes in python",
+    ],
+    answer:
+      "asyncio suits IO-bound work such as many network calls: mark functions async and await them. The GIL limits threads for CPU-heavy work, so use multiprocessing when you need real parallel computation.",
+    code: 'import asyncio\n\nasync def main():\n    await asyncio.sleep(1)\n    print("done")\n\nasyncio.run(main())',
+  },
+  {
+    id: "databases",
+    topic: "Databases with Python",
+    questions: [
+      "how do i connect python to a database",
+      "how to use sqlite in python",
+      "can python talk to mysql or postgres",
+      "what is an orm",
+    ],
+    answer:
+      "sqlite3 ships with Python and needs no server, which makes it perfect for small apps. For MySQL or PostgreSQL use a driver such as psycopg or mysql-connector, or an ORM like SQLAlchemy to work with objects instead of raw SQL.",
+    code: 'import sqlite3\n\ncon = sqlite3.connect("app.db")\ncon.execute("CREATE TABLE IF NOT EXISTS todo(task TEXT)")\ncon.execute("INSERT INTO todo VALUES (?)", ("learn python",))\ncon.commit()',
+  },
+  {
+    id: "dunder-main",
+    topic: "Scripts and __main__",
+    questions: [
+      "what does if __name__ == '__main__' mean",
+      "how do i run a python file",
+      "how do i pass arguments to a script",
+      "what is the difference between a script and a module",
+    ],
+    answer:
+      "A file run directly gets __name__ set to \"__main__\", so that guard keeps setup code from firing when the file is imported. Command-line arguments arrive in sys.argv, or use argparse for a friendly interface.",
+    code: 'import sys\n\ndef main():\n    print("args:", sys.argv[1:])\n\nif __name__ == "__main__":\n    main()',
+  },
 ];
 
 export const kbTopics = Array.from(new Set(knowledgeBase.map((e) => e.topic)));
