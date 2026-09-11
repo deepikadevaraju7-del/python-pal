@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
+import logoMark from "@/assets/pycard-mark.png.asset.json";
 import { askPython } from "@/lib/ask.functions";
 import type { MatchResult } from "@/lib/matcher";
 
