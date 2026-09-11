@@ -10,3 +10,4 @@
 - [x] Seed the table with the full 48-topic knowledge base
 - [x] Switch the ask endpoint to load the knowledge base from Supabase (in-code deck as fallback)
 - [x] End-to-end test: answers, indirect questions, fallback
+- [x] Neutral branding: removed Lovable references, applied custom logo (header + favicon)
