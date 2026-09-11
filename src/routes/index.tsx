@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
+import logoMark from "@/assets/pycard-mark.png.asset.json";
 import { askPython } from "@/lib/ask.functions";
 import type { MatchResult } from "@/lib/matcher";
 
@@ -96,9 +97,13 @@ function ChatPage() {
       <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-2xl flex-col px-3 sm:px-5">
         <header className="flex items-center justify-between gap-3 py-4">
           <div className="flex items-center gap-3">
-            <div className="grid size-9 place-items-center rounded-xl bg-ink font-mono text-sm font-medium text-white">
-              Py
-            </div>
+            <img
+              src={logoMark.url}
+              alt="PyCard logo"
+              width={36}
+              height={36}
+              className="size-9 rounded-xl bg-white object-contain ring-1 ring-black/5"
+            />
             <div>
               <h1 className="font-display text-base font-semibold leading-none tracking-tight">
                 PyCard
