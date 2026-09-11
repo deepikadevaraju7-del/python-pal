@@ -166,41 +166,17 @@ function terms(text: string, keepStopWords = false): string[] {
     .map((w) => normalize(stem(normalize(w))));
 }
 
-/** Inverse document frequency over every stored question variant. */
-const documents: { entry: KbEntry; terms: string[]; text: string }[] = knowledgeBase.flatMap(
-  (entry) =>
-    entry.questions.map((q) => ({
-      entry,
-      terms: terms(`${q} ${entry.topic}`),
-      text: `${q} ${entry.topic}`,
-    })),
-);
-
-/** Broader per-entry documents (topic + answer) so off-script wording still lands. */
-const entryDocuments: { entry: KbEntry; terms: string[] }[] = knowledgeBase.map((entry) => ({
-  entry,
-  terms: terms(`${entry.topic} ${entry.questions.join(" ")} ${entry.answer}`),
-}));
-
-
-const idf = new Map<string, number>();
-{
-  const df = new Map<string, number>();
-  for (const doc of documents) {
-    for (const t of new Set(doc.terms)) df.set(t, (df.get(t) ?? 0) + 1);
-  }
-  for (const [t, count] of df) {
-    idf.set(t, Math.log(1 + documents.length / count));
-  }
-}
-
-function weight(term: string): number {
-  return idf.get(term) ?? Math.log(1 + documents.length);
-}
-
 /** Weighted cosine similarity between two bags of terms. */
-function similarity(queryTerms: string[], docTerms: string[]): number {
+function weightedSimilarity(
+  queryTerms: string[],
+  docTerms: string[],
+  idf: Map<string, number>,
+  corpusSize: number,
+): number {
   if (!queryTerms.length || !docTerms.length) return 0;
+  const weight = (term: string): number =>
+    idf.get(term) ?? Math.log(1 + corpusSize);
+
   const qv = new Map<string, number>();
   const dv = new Map<string, number>();
   for (const t of queryTerms) qv.set(t, (qv.get(t) ?? 0) + weight(t));
@@ -240,7 +216,40 @@ export type MatchResult = {
 
 const CONFIDENCE_THRESHOLD = 0.34;
 
-export function findAnswer(question: string): MatchResult {
+/**
+ * Builds a retrieval index over the given entries and answers questions with it.
+ * Stateless by design — safe for stateless server workers.
+ */
+export function findAnswer(question: string, entries: KbEntry[] = knowledgeBase): MatchResult {
+  const topics = Array.from(new Set(entries.map((e) => e.topic)));
+
+  /** Inverse document frequency over every stored question variant. */
+  const documents: { entry: KbEntry; terms: string[]; text: string }[] = entries.flatMap(
+    (entry) =>
+      entry.questions.map((q) => ({
+        entry,
+        terms: terms(`${q} ${entry.topic}`),
+        text: `${q} ${entry.topic}`,
+      })),
+  );
+
+  /** Broader per-entry documents (topic + answer) so off-script wording still lands. */
+  const entryDocuments: { entry: KbEntry; terms: string[] }[] = entries.map((entry) => ({
+    entry,
+    terms: terms(`${entry.topic} ${entry.questions.join(" ")} ${entry.answer}`),
+  }));
+
+  const idf = new Map<string, number>();
+  {
+    const df = new Map<string, number>();
+    for (const doc of documents) {
+      for (const t of new Set(doc.terms)) df.set(t, (df.get(t) ?? 0) + 1);
+    }
+    for (const [t, count] of df) {
+      idf.set(t, Math.log(1 + documents.length / count));
+    }
+  }
+
   const query = question.trim();
   const queryTerms = terms(query);
   const effective = queryTerms.length ? queryTerms : terms(query, true);
@@ -248,7 +257,7 @@ export function findAnswer(question: string): MatchResult {
   let best: { entry: KbEntry; score: number } | null = null;
 
   for (const doc of documents) {
-    const cosine = similarity(effective, doc.terms);
+    const cosine = weightedSimilarity(effective, doc.terms, idf, documents.length);
     const fuzzy = bigramOverlap(query, doc.text);
     const score = cosine * 0.8 + fuzzy * 0.2;
     if (!best || score > best.score) best = { entry: doc.entry, score };
@@ -256,12 +265,11 @@ export function findAnswer(question: string): MatchResult {
 
   // Broader pass over each entry's full text — rescues indirect phrasings.
   for (const doc of entryDocuments) {
-    const score = similarity(effective, doc.terms) * 0.85;
+    const score = weightedSimilarity(effective, doc.terms, idf, documents.length) * 0.85;
     if (!best || score > best.score) best = { entry: doc.entry, score };
   }
 
   const confidence = best ? Math.min(0.99, Math.round(best.score * 100) / 100) : 0;
-
 
   if (!best || confidence < CONFIDENCE_THRESHOLD) {
     return {
@@ -269,7 +277,7 @@ export function findAnswer(question: string): MatchResult {
       confidence,
       answer:
         "I couldn't match that to a confident entry in the deck. I answer questions drawn from a fixed Python knowledge base — try rephrasing, or pick one of the topics below.",
-      suggestions: kbTopics.slice(0, 8),
+      suggestions: (topics.length ? topics : kbTopics).slice(0, 8),
     };
   }
 
