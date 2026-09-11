@@ -671,6 +671,302 @@ export const knowledgeBase: KbEntry[] = [
       "A file run directly gets __name__ set to \"__main__\", so that guard keeps setup code from firing when the file is imported. Command-line arguments arrive in sys.argv, or use argparse for a friendly interface.",
     code: 'import sys\n\ndef main():\n    print("args:", sys.argv[1:])\n\nif __name__ == "__main__":\n    main()',
   },
+  {
+    id: "decorators",
+    topic: "Decorators",
+    questions: [
+      "what is a decorator in python",
+      "how do decorators work",
+      "how do i add logging or timing to a function without changing it",
+      "what does the @ symbol mean above a function",
+      "how do i write my own decorator",
+      "what is functools.wraps",
+    ],
+    answer:
+      "A decorator is a function that takes a function and returns a new one, letting you wrap extra behaviour (timing, logging, caching, access checks) around code without editing it. The @name line above a def is shorthand for func = name(func). Use functools.wraps so the wrapped function keeps its name and docstring.",
+    code: "import functools, time\n\ndef timed(fn):\n    @functools.wraps(fn)\n    def wrapper(*args, **kwargs):\n        start = time.perf_counter()\n        result = fn(*args, **kwargs)\n        print(f\"{fn.__name__} took {time.perf_counter() - start:.4f}s\")\n        return result\n    return wrapper\n\n@timed\ndef slow():\n    time.sleep(0.5)",
+  },
+  {
+    id: "decorators-advanced",
+    topic: "Advanced decorators",
+    questions: [
+      "how do i write a decorator that takes arguments",
+      "what is a class decorator",
+      "how do i cache results of a function",
+      "what is lru_cache",
+      "how do i retry a function automatically",
+    ],
+    answer:
+      "A decorator with arguments is a function returning a decorator — three nested levels. Classes can be decorators too by implementing __call__. For caching use functools.lru_cache or functools.cache; for retries wrap the call in a loop inside the wrapper.",
+    code: "import functools\n\ndef repeat(times):\n    def deco(fn):\n        @functools.wraps(fn)\n        def wrapper(*a, **k):\n            for _ in range(times):\n                result = fn(*a, **k)\n            return result\n        return wrapper\n    return deco\n\n@functools.lru_cache(maxsize=None)\ndef fib(n):\n    return n if n < 2 else fib(n - 1) + fib(n - 2)",
+  },
+  {
+    id: "generators-advanced",
+    topic: "Generators and yield",
+    questions: [
+      "what is a generator in python",
+      "what does yield do",
+      "how is yield different from return",
+      "how do i read a huge file without loading it into memory",
+      "what is a generator expression",
+      "what is yield from",
+      "how do i make an infinite sequence lazily",
+    ],
+    answer:
+      "A generator function uses yield to produce values one at a time and pauses between them, so it uses almost no memory no matter how long the sequence is. Calling it returns a generator object you iterate; return ends it. yield from delegates to another iterable, and (x for x in data) is a generator expression.",
+    code: "def read_lines(path):\n    with open(path) as f:\n        for line in f:\n            yield line.rstrip()\n\ndef counter(start=0):\n    while True:\n        yield start\n        start += 1\n\nbig_total = sum(len(l) for l in read_lines(\"data.txt\"))",
+  },
+  {
+    id: "coroutines-send",
+    topic: "Coroutines and generator pipelines",
+    questions: [
+      "what is generator.send",
+      "how do i build a data pipeline with generators",
+      "what is a coroutine in python",
+      "how do i chain generators together",
+    ],
+    answer:
+      "Generators can also receive values with .send(), which turns them into simple coroutines. Chaining generators makes streaming pipelines: each stage takes an iterable and yields transformed items, so data flows through lazily without intermediate lists.",
+    code: "def numbers(n):\n    yield from range(n)\n\ndef squared(source):\n    for x in source:\n        yield x * x\n\ndef only_even(source):\n    for x in source:\n        if x % 2 == 0:\n            yield x\n\nprint(list(only_even(squared(numbers(10)))))",
+  },
+  {
+    id: "metaclasses",
+    topic: "Metaclasses",
+    questions: [
+      "what is a metaclass in python",
+      "how do metaclasses work",
+      "what is type() with three arguments",
+      "when should i use a metaclass",
+      "how do i register subclasses automatically",
+      "what is __init_subclass__",
+    ],
+    answer:
+      "A metaclass is the class of a class: it controls how classes themselves are created. type is the default metaclass, and type(name, bases, namespace) builds a class at runtime. Use a metaclass for framework-level tricks like auto-registering subclasses or validating class definitions — for most cases __init_subclass__ or a class decorator is simpler and clearer.",
+    code: "class RegistryMeta(type):\n    registry = {}\n    def __new__(mcls, name, bases, ns):\n        cls = super().__new__(mcls, name, bases, ns)\n        if bases:\n            RegistryMeta.registry[name.lower()] = cls\n        return cls\n\nclass Plugin(metaclass=RegistryMeta):\n    pass\n\nclass CsvPlugin(Plugin):\n    pass\n\nprint(RegistryMeta.registry)  # {\"csvplugin\": <class CsvPlugin>}",
+  },
+  {
+    id: "descriptors-properties",
+    topic: "Descriptors and properties",
+    questions: [
+      "what is a property in python",
+      "how do i make a getter and setter",
+      "what is a descriptor",
+      "what does @property do",
+      "how do i validate an attribute when it is set",
+      "what is __get__ and __set__",
+    ],
+    answer:
+      "@property turns a method into a read-only attribute, and @x.setter adds validation on assignment — no need for Java-style getters. Under the hood properties are descriptors: objects defining __get__/__set__ that control attribute access, which is how properties, methods and classmethods all work.",
+    code: "class Account:\n    def __init__(self, balance):\n        self._balance = balance\n\n    @property\n    def balance(self):\n        return self._balance\n\n    @balance.setter\n    def balance(self, value):\n        if value < 0:\n            raise ValueError(\"balance cannot be negative\")\n        self._balance = value",
+  },
+  {
+    id: "dunder-methods",
+    topic: "Magic (dunder) methods",
+    questions: [
+      "what are dunder methods",
+      "what is __str__ vs __repr__",
+      "how do i make my class support + or ==",
+      "how do i make an object iterable",
+      "what is __enter__ and __exit__",
+      "how do i write a context manager",
+      "how do i make len() work on my class",
+    ],
+    answer:
+      "Dunder methods let your objects behave like built-ins: __repr__/__str__ for printing, __eq__ and __hash__ for comparison, __add__ for +, __len__ for len(), __iter__ for loops, and __enter__/__exit__ for with-blocks. contextlib.contextmanager gives you a context manager from a single generator.",
+    code: "from contextlib import contextmanager\n\nclass Money:\n    def __init__(self, amount): self.amount = amount\n    def __repr__(self): return f\"Money({self.amount})\"\n    def __add__(self, other): return Money(self.amount + other.amount)\n    def __eq__(self, other): return self.amount == other.amount\n\n@contextmanager\ndef timer():\n    import time; start = time.perf_counter()\n    yield\n    print(time.perf_counter() - start)",
+  },
+  {
+    id: "dataclasses",
+    topic: "Dataclasses and modern classes",
+    questions: [
+      "what is a dataclass",
+      "how do i avoid writing __init__ for every class",
+      "what is the difference between dataclass and namedtuple",
+      "what is frozen=True",
+      "how do i make an immutable class",
+      "what is pydantic used for",
+    ],
+    answer:
+      "@dataclass generates __init__, __repr__ and __eq__ from annotated fields, cutting boilerplate. frozen=True makes instances immutable and hashable, and field(default_factory=list) avoids the mutable-default trap. NamedTuple is lighter and tuple-like; pydantic adds runtime validation and parsing on top.",
+    code: "from dataclasses import dataclass, field\n\n@dataclass(frozen=True)\nclass Point:\n    x: float\n    y: float\n\n@dataclass\nclass Cart:\n    items: list[str] = field(default_factory=list)",
+  },
+  {
+    id: "design-patterns",
+    topic: "Design patterns in Python",
+    questions: [
+      "what design patterns are used in python",
+      "how do i implement a singleton in python",
+      "what is dependency injection in python",
+      "what is the factory pattern",
+      "how should i structure a large python project",
+      "what is the strategy pattern",
+    ],
+    answer:
+      "Python's first-class functions make many classic patterns lightweight: strategy is just passing a function, factory is a function returning objects, and singleton is usually a module-level instance. Structure larger projects as a package with clear layers — entry point, services/business logic, data access, and tests — and pass dependencies in rather than importing globals.",
+    code: "# strategy as a plain function\ndef by_price(item): return item[\"price\"]\n\ndef sort_items(items, key=by_price):\n    return sorted(items, key=key)\n\n# factory\ndef make_storage(kind):\n    return {\"file\": FileStore, \"memory\": MemoryStore}[kind]()",
+  },
+  {
+    id: "testing",
+    topic: "Testing and pytest",
+    questions: [
+      "how do i test python code",
+      "what is pytest",
+      "how do i write unit tests",
+      "what is a fixture in pytest",
+      "how do i mock an api call in tests",
+      "what is test coverage",
+      "what is tdd",
+    ],
+    answer:
+      "pytest is the standard choice: plain functions named test_* with assert statements. Fixtures supply reusable setup, parametrize runs one test over many inputs, and unittest.mock patches external calls so tests stay fast and offline. Run pytest --cov to see which lines your tests touch.",
+    code: "import pytest\nfrom unittest.mock import patch\n\n@pytest.fixture\ndef cart():\n    return {\"items\": []}\n\n@pytest.mark.parametrize(\"value,expected\", [(2, 4), (3, 9)])\ndef test_square(value, expected):\n    assert value ** 2 == expected\n\ndef test_api():\n    with patch(\"requests.get\") as get:\n        get.return_value.json.return_value = {\"ok\": True}",
+  },
+  {
+    id: "performance",
+    topic: "Performance and optimisation",
+    questions: [
+      "how do i make python faster",
+      "why is python slow",
+      "how do i profile python code",
+      "what is the gil",
+      "when should i use numpy instead of loops",
+      "how do i find a bottleneck in my code",
+      "what is caching",
+    ],
+    answer:
+      "Measure before optimising: cProfile or timeit shows where time actually goes. Common wins are choosing better data structures (set lookups over list scans), vectorising with NumPy, caching with functools.cache, and avoiding work inside loops. The GIL means threads don't speed up CPU-bound work — use multiprocessing for that.",
+    code: "import cProfile, timeit\n\ncProfile.run(\"main()\")\nprint(timeit.timeit(\"sum(range(1000))\", number=10000))\n\n# set membership is O(1) vs list O(n)\nallowed = {\"a\", \"b\", \"c\"}\nif \"a\" in allowed:\n    pass",
+  },
+  {
+    id: "packaging-distribution",
+    topic: "Packaging and publishing",
+    questions: [
+      "how do i publish a python package",
+      "what is pyproject.toml",
+      "how do i make my script installable",
+      "what is a wheel",
+      "how do i upload to pypi",
+      "what is poetry or uv",
+    ],
+    answer:
+      "Modern packaging uses a pyproject.toml describing name, version and dependencies. Build with python -m build to produce a wheel and sdist, then upload with twine to PyPI. Tools like Poetry, Hatch or uv wrap the whole workflow, and a [project.scripts] entry turns a function into a command-line program.",
+    code: "# pyproject.toml\n[project]\nname = \"mytool\"\nversion = \"0.1.0\"\ndependencies = [\"requests\"]\n\n[project.scripts]\nmytool = \"mytool.cli:main\"",
+  },
+  {
+    id: "project-cli",
+    topic: "Real project: CLI tool",
+    questions: [
+      "what python project should i build",
+      "give me a beginner python project idea",
+      "how do i build a command line tool in python",
+      "what are good portfolio projects in python",
+      "how do i build a to do list app in python",
+    ],
+    answer:
+      "A command-line tool is the best first real project: a to-do manager, expense tracker or file organiser. Use argparse for commands, json or sqlite3 for storage, and split the code into cli.py and core.py so the logic is testable. It shows off argument parsing, persistence, error handling and tests in one small repo.",
+    code: "import argparse, json, pathlib\n\nDB = pathlib.Path(\"todo.json\")\n\ndef add(task):\n    items = json.loads(DB.read_text()) if DB.exists() else []\n    items.append({\"task\": task, \"done\": False})\n    DB.write_text(json.dumps(items, indent=2))\n\np = argparse.ArgumentParser()\np.add_argument(\"task\")\nadd(p.parse_args().task)",
+  },
+  {
+    id: "project-api",
+    topic: "Real project: web API",
+    questions: [
+      "how do i build a rest api in python",
+      "how do i build a web app with fastapi",
+      "what is a good intermediate python project",
+      "how do i connect a python api to a database",
+      "how do i deploy a python api",
+    ],
+    answer:
+      "Build a small REST API with FastAPI: define pydantic models, write path operations, and store data in SQLite via SQLAlchemy. You get automatic docs at /docs and validation for free. Deploy with uvicorn behind a host like Render, Fly.io or a container — great portfolio material because it covers routing, validation, persistence and deployment.",
+    code: "from fastapi import FastAPI\nfrom pydantic import BaseModel\n\napp = FastAPI()\n\nclass Task(BaseModel):\n    title: str\n    done: bool = False\n\ntasks: list[Task] = []\n\n@app.post(\"/tasks\")\ndef create(task: Task):\n    tasks.append(task)\n    return task",
+  },
+  {
+    id: "project-data",
+    topic: "Real project: data analysis",
+    questions: [
+      "how do i build a data analysis project",
+      "what can i build with pandas",
+      "how do i analyse a csv file in python",
+      "how do i make charts in python",
+      "what is a good data science portfolio project",
+    ],
+    answer:
+      "Pick a public CSV dataset, load it with pandas, clean missing values, group and aggregate to answer two or three concrete questions, then chart the results with matplotlib and write up findings in a notebook. That end-to-end story — question, cleaning, analysis, visual, conclusion — is what reviewers look for.",
+    code: "import pandas as pd\nimport matplotlib.pyplot as plt\n\ndf = pd.read_csv(\"sales.csv\").dropna(subset=[\"amount\"])\nmonthly = df.groupby(df[\"date\"].str[:7])[\"amount\"].sum()\nmonthly.plot(kind=\"bar\")\nplt.show()",
+  },
+  {
+    id: "project-automation-bot",
+    topic: "Real project: automation and bots",
+    questions: [
+      "how do i automate boring tasks with python",
+      "how do i build a discord or telegram bot",
+      "how do i scrape a website and save results",
+      "how do i schedule a python script to run daily",
+      "how do i send emails with python",
+    ],
+    answer:
+      "Automation projects are quick wins: rename and sort files, scrape a page with requests plus BeautifulSoup into a CSV, email a daily report with smtplib, or run a chat bot with discord.py. Schedule them with cron on Linux/macOS, Task Scheduler on Windows, or a hosted scheduler.",
+    code: "import requests, csv\nfrom bs4 import BeautifulSoup\n\nhtml = requests.get(\"https://example.com\").text\nsoup = BeautifulSoup(html, \"html.parser\")\nrows = [(h.text.strip(),) for h in soup.select(\"h2\")]\n\nwith open(\"out.csv\", \"w\", newline=\"\") as f:\n    csv.writer(f).writerows(rows)",
+  },
+  {
+    id: "concurrency-advanced",
+    topic: "Threads, processes and async",
+    questions: [
+      "what is the difference between threading and multiprocessing",
+      "when should i use asyncio",
+      "how do i run tasks in parallel in python",
+      "what is concurrent.futures",
+      "how do i speed up many api calls",
+    ],
+    answer:
+      "Use asyncio or threads for I/O-bound work (network, files) and multiprocessing for CPU-bound work, because the GIL stops threads from running Python bytecode in parallel. concurrent.futures gives one simple API for both pools, and asyncio.gather fires many awaits at once.",
+    code: "import asyncio, httpx\nfrom concurrent.futures import ThreadPoolExecutor\n\nasync def fetch_all(urls):\n    async with httpx.AsyncClient() as client:\n        return await asyncio.gather(*(client.get(u) for u in urls))\n\nwith ThreadPoolExecutor() as pool:\n    results = list(pool.map(str.upper, [\"a\", \"b\"]))",
+  },
+  {
+    id: "advanced-typing",
+    topic: "Advanced typing",
+    questions: [
+      "what are generics in python typing",
+      "what is typevar",
+      "what is a protocol in typing",
+      "how do i type check my code",
+      "what is mypy",
+      "what is optional and union typing",
+    ],
+    answer:
+      "typing lets you express intent precisely: TypeVar and Generic for reusable containers, Protocol for structural (duck) typing, Literal and TypedDict for exact shapes, and X | None for optional values. Run mypy or pyright to catch mismatches before runtime — types are hints, never enforced by Python itself.",
+    code: "from typing import Protocol, TypeVar, Generic\n\nT = TypeVar(\"T\")\n\nclass Repo(Generic[T]):\n    def __init__(self) -> None:\n        self.items: list[T] = []\n\nclass Closeable(Protocol):\n    def close(self) -> None: ...",
+  },
+  {
+    id: "memory-internals",
+    topic: "Python internals and memory",
+    questions: [
+      "how does python manage memory",
+      "what is garbage collection in python",
+      "what is reference counting",
+      "what is the difference between is and ==",
+      "what are cpython bytecode and the interpreter",
+      "what is a weak reference",
+    ],
+    answer:
+      "CPython frees objects by reference counting, with a cycle collector for objects that reference each other. is compares identity (same object), == compares value. Source is compiled to bytecode run by the interpreter; the dis module lets you inspect it, and __slots__ or generators cut memory in hot paths.",
+    code: "import sys, dis\n\nx = [1, 2, 3]\nprint(sys.getrefcount(x))\ndis.dis(\"a = 1 + 2\")\n\nclass Point:\n    __slots__ = (\"x\", \"y\")",
+  },
+  {
+    id: "security-best-practices",
+    topic: "Secure and production-ready Python",
+    questions: [
+      "how do i keep api keys safe in python",
+      "how do i handle secrets and environment variables",
+      "how do i log properly in python",
+      "what are python best practices for production",
+      "how do i validate user input safely",
+      "why is eval dangerous",
+    ],
+    answer:
+      "Keep secrets in environment variables (os.environ) or a .env file that is gitignored, never in source. Use the logging module instead of print, validate input with pydantic or explicit checks, use parameterised SQL queries, and avoid eval/exec on untrusted data. Pin dependencies and scan them with pip-audit.",
+    code: "import os, logging\n\nlogging.basicConfig(level=logging.INFO)\nlog = logging.getLogger(__name__)\n\nAPI_KEY = os.environ[\"API_KEY\"]  # fails loudly if missing\nlog.info(\"starting up\")\n\ncur.execute(\"SELECT * FROM users WHERE id = ?\", (user_id,))  # never f-strings",
+  },
 ];
 
 export const kbTopics = Array.from(new Set(knowledgeBase.map((e) => e.topic)));
