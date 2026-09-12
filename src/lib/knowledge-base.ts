@@ -967,6 +967,186 @@ export const knowledgeBase: KbEntry[] = [
       "Keep secrets in environment variables (os.environ) or a .env file that is gitignored, never in source. Use the logging module instead of print, validate input with pydantic or explicit checks, use parameterised SQL queries, and avoid eval/exec on untrusted data. Pin dependencies and scan them with pip-audit.",
     code: "import os, logging\n\nlogging.basicConfig(level=logging.INFO)\nlog = logging.getLogger(__name__)\n\nAPI_KEY = os.environ[\"API_KEY\"]  # fails loudly if missing\nlog.info(\"starting up\")\n\ncur.execute(\"SELECT * FROM users WHERE id = ?\", (user_id,))  # never f-strings",
   },
+  {
+    id: "args-kwargs",
+    topic: "*args and **kwargs",
+    questions: [
+      "what is *args and **kwargs",
+      "how do i accept any number of arguments",
+      "what does the star mean in a function definition",
+      "how do i unpack arguments into a function",
+      "what are variable length arguments",
+      "difference between args and kwargs",
+    ],
+    answer:
+      "*args collects extra positional arguments into a tuple and **kwargs collects extra keyword arguments into a dict. The same stars unpack a list or dict back into a call. Use them for flexible wrappers and pass-through functions.",
+    code: "def report(title, *args, **kwargs):\n    print(title, args, kwargs)\n\nreport(\"totals\", 1, 2, 3, unit=\"kg\")\n\nvalues = [1, 2, 3]\noptions = {\"unit\": \"kg\"}\nreport(\"totals\", *values, **options)",
+  },
+  {
+    id: "polymorphism",
+    topic: "Polymorphism and duck typing",
+    questions: [
+      "what is polymorphism",
+      "what is duck typing in python",
+      "how does method overriding work",
+      "can python do method overloading",
+      "what is an abstract base class",
+      "how do different classes share the same interface",
+    ],
+    answer:
+      "Polymorphism means different objects respond to the same method call in their own way. Python leans on duck typing: if an object has the method, it works, no shared base class required. Override a method in a subclass to change behaviour, and use abc.ABC to declare a required interface. Python has no true overloading; use default args or functools.singledispatch.",
+    code: "from abc import ABC, abstractmethod\n\nclass Shape(ABC):\n    @abstractmethod\n    def area(self): ...\n\nclass Square(Shape):\n    def __init__(self, s): self.s = s\n    def area(self): return self.s ** 2\n\nfor shape in [Square(2), Square(3)]:\n    print(shape.area())",
+  },
+  {
+    id: "regex",
+    topic: "Regular expressions",
+    questions: [
+      "how to use regex in python",
+      "what is the re module",
+      "how do i match a pattern in a string",
+      "how do i extract emails or numbers from text",
+      "how do i use findall and sub",
+      "how do i search text with a pattern",
+    ],
+    answer:
+      "The re module handles patterns: re.search finds the first match, re.findall returns all matches, re.sub replaces them, and re.match anchors at the start. Use raw strings (r\"...\") for patterns and groups () to capture parts. Compile a pattern with re.compile when reusing it.",
+    code: "import re\n\ntext = \"call 555-1234 or 555-9876\"\nprint(re.findall(r\"\\d{3}-\\d{4}\", text))\nprint(re.sub(r\"\\d\", \"#\", text))\n\nm = re.search(r\"(\\w+)@(\\w+)\\.com\", \"me@example.com\")\nif m:\n    print(m.group(1), m.group(2))",
+  },
+  {
+    id: "docstrings",
+    topic: "Docstrings and documentation",
+    questions: [
+      "what is a docstring",
+      "how do i document a function in python",
+      "how does help() work",
+      "what is __doc__",
+      "what docstring style should i use",
+      "how do i add comments and documentation",
+    ],
+    answer:
+      "A docstring is a string literal placed as the first statement in a module, class, or function; it is stored in __doc__ and shown by help(). Use triple quotes, a one-line summary, then details about arguments and return value. Google or NumPy style are common, and tools like Sphinx and pydoc build docs from them.",
+    code: "def area(width: float, height: float) -> float:\n    \"\"\"Return the area of a rectangle.\n\n    Args:\n        width: Width in metres.\n        height: Height in metres.\n    Returns:\n        The area in square metres.\n    \"\"\"\n    return width * height\n\nhelp(area)",
+  },
+  {
+    id: "pickle-serialization",
+    topic: "Pickle and serialisation",
+    questions: [
+      "what is pickle",
+      "how do i save a python object to a file",
+      "how do i serialise data in python",
+      "pickle vs json which should i use",
+      "how do i load a saved object back",
+      "is pickle safe",
+    ],
+    answer:
+      "pickle converts Python objects to bytes and back, so you can save almost any object to disk. Use pickle.dump/load with binary file modes. Prefer json for data shared with other languages or untrusted sources — never unpickle data you did not create, since it can execute arbitrary code.",
+    code: "import pickle\n\ndata = {\"scores\": [1, 2, 3], \"name\": \"deck\"}\nwith open(\"data.pkl\", \"wb\") as f:\n    pickle.dump(data, f)\n\nwith open(\"data.pkl\", \"rb\") as f:\n    print(pickle.load(f))",
+  },
+  {
+    id: "enumerate-zip",
+    topic: "enumerate, zip and looping helpers",
+    questions: [
+      "what is enumerate",
+      "how does zip work",
+      "how do i get the index while looping",
+      "how do i loop over two lists at once",
+      "how do i unzip a list of pairs",
+      "what are useful builtins for loops",
+    ],
+    answer:
+      "enumerate(iterable, start=0) yields (index, item) pairs so you don't track a counter. zip(a, b) pairs items from several iterables and stops at the shortest; zip(*pairs) unzips them again. Combine with reversed(), sorted() and itertools for most looping needs.",
+    code: "names = [\"ana\", \"bo\"]\nscores = [91, 84]\n\nfor i, name in enumerate(names, start=1):\n    print(i, name)\n\nfor name, score in zip(names, scores):\n    print(name, score)\n\npairs = list(zip(names, scores))\nback_names, back_scores = zip(*pairs)",
+  },
+  {
+    id: "none-truthiness",
+    topic: "None, truthiness and equality",
+    questions: [
+      "what is none in python",
+      "how do i check for none",
+      "what is the difference between none false and 0",
+      "what values are falsy in python",
+      "why use is none instead of == none",
+      "what does a function return by default",
+    ],
+    answer:
+      "None is Python's single 'no value' object and is what a function returns when it has no return statement. Check it with `is None` / `is not None` because identity is exact. Falsy values include None, False, 0, 0.0, \"\", [], {}, set() — everything else is truthy, so None, False and 0 are distinct even though all are falsy.",
+    code: "def find(items, target):\n    for item in items:\n        if item == target:\n            return item\n    return None  # implicit anyway\n\nresult = find([], 1)\nif result is None:\n    print(\"not found\")\n\nprint(bool(0), bool(\"\"), bool([]), bool(\"0\"))",
+  },
+  {
+    id: "shallow-deep-copy",
+    topic: "Copying objects",
+    questions: [
+      "what is a shallow copy",
+      "what is the difference between shallow and deep copy",
+      "how do i copy a list properly",
+      "why does changing one list change another",
+      "how do i use copy.deepcopy",
+      "how do i clone a nested dictionary",
+    ],
+    answer:
+      "Assignment only makes another name for the same object. A shallow copy (list(x), x[:], copy.copy) makes a new outer container but shares the inner objects, so nested changes show in both. copy.deepcopy recursively copies everything, which is safer but slower.",
+    code: "import copy\n\nrows = [[1, 2], [3, 4]]\nshallow = copy.copy(rows)\ndeep = copy.deepcopy(rows)\n\nrows[0][0] = 99\nprint(shallow[0][0])  # 99 — shared inner list\nprint(deep[0][0])     # 1  — fully independent",
+  },
+  {
+    id: "append-extend-insert",
+    topic: "Adding and removing list items",
+    questions: [
+      "what is the difference between append and extend",
+      "how do i add items to a list",
+      "when should i use insert",
+      "how do i remove an item from a list",
+      "what is the difference between pop remove and del",
+      "how do i join two lists",
+    ],
+    answer:
+      "append adds one item (a list appended stays nested); extend adds every item of an iterable; insert(i, x) places an item at a position. To remove: remove(value) deletes the first match, pop(i) removes and returns by index, del removes by index or slice, and clear() empties the list. a + b makes a new joined list.",
+    code: "a = [1, 2]\na.append([3, 4])   # [1, 2, [3, 4]]\na.pop()\na.extend([3, 4])   # [1, 2, 3, 4]\na.insert(0, 0)     # [0, 1, 2, 3, 4]\na.remove(3)\ndel a[0]\nprint(a + [9])",
+  },
+  {
+    id: "global-nonlocal",
+    topic: "global and nonlocal keywords",
+    questions: [
+      "what is the global keyword",
+      "what does nonlocal do",
+      "how do i modify a variable outside a function",
+      "why do i get unboundlocalerror",
+      "what is the legb rule",
+      "should i use global variables",
+    ],
+    answer:
+      "Python resolves names Local → Enclosing → Global → Builtin (LEGB). Assigning to a name inside a function makes it local, which is why reading it first raises UnboundLocalError. `global x` rebinds a module-level name and `nonlocal x` rebinds one in an enclosing function. Prefer returning values or using a class over global state.",
+    code: "count = 0\n\ndef bump():\n    global count\n    count += 1\n\ndef outer():\n    total = 0\n    def inner():\n        nonlocal total\n        total += 1\n    inner()\n    return total",
+  },
+  {
+    id: "timing-code",
+    topic: "Timing and measuring code",
+    questions: [
+      "how do i measure execution time",
+      "how long does my function take to run",
+      "how do i use timeit",
+      "how do i benchmark python code",
+      "how do i time a block of code",
+      "what is perf_counter",
+    ],
+    answer:
+      "For a quick wall-clock measurement use time.perf_counter() around the block. For small snippets use timeit, which runs them many times and reports the best result. For whole programs, profile with cProfile to find where the time actually goes before optimising.",
+    code: "import time, timeit\n\nstart = time.perf_counter()\nsum(range(1_000_000))\nprint(f\"{time.perf_counter() - start:.4f}s\")\n\nprint(timeit.timeit(\"sum(range(1000))\", number=10_000))",
+  },
+  {
+    id: "merge-dicts",
+    topic: "Merging and updating dictionaries",
+    questions: [
+      "how do i merge two dictionaries",
+      "how do i combine dicts in python",
+      "what does the pipe operator do with dicts",
+      "how do i update a dictionary with another",
+      "how do i add default values to a dict",
+      "what is setdefault and defaultdict",
+    ],
+    answer:
+      "In Python 3.9+ use a | b to merge into a new dict (right side wins) and a |= b to merge in place; {**a, **b} works on older versions. a.update(b) mutates a. Use setdefault or collections.defaultdict when you want a value created automatically for missing keys.",
+    code: "a = {\"x\": 1, \"y\": 2}\nb = {\"y\": 9, \"z\": 3}\n\nprint(a | b)        # {'x': 1, 'y': 9, 'z': 3}\nprint({**a, **b})\na.update(b)\n\nfrom collections import defaultdict\ncounts = defaultdict(int)\ncounts[\"hits\"] += 1",
+  },
 ];
 
 export const kbTopics = Array.from(new Set(knowledgeBase.map((e) => e.topic)));
